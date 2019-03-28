@@ -1,4 +1,4 @@
-
+# activation Function of nerual
 
 def sigmoid(x, mode = 'F'):
 	if mode != 'F':

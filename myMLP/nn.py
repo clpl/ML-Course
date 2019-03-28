@@ -1,55 +1,38 @@
 #coding:utf-8
-from mnist import MNIST
+
 import numpy as np
+from activationFunction import *
+from lossFunction import *
 
 #load dataset
 mndata = MNIST('../python-mnist/data')
 train_images, train_labels = mndata.load_training()
 test_images, test_labels = mndata.load_testing()
 
-def MSE_loss(Y_P, Y):
-
-	#print(Y_P, Y, Y_P - Y)
-	loss_sum = np.square(Y_P - Y).sum()
-	
-	return loss_sum / (2 * len(Y))
-
-def sigmoid(x, mode = 'F'):
-	if mode != 'F':
-		return sigmoid(x) * (1.0 - sigmoid(x))
-	return 1.0 / (1.0 + np.exp(-x))
-
-def tanh(x, mode = 'F'):
-	if mode != 'F':
-		return (1.0 - x * x)
-	return (1.0 - np.exp(-x)) / (1.0 + np.exp(-x))
-
-def one_hot(vec_size, index):
-	zeros = np.zeros(vec_size)
-	zeros[index] = 1.0
-	return zeros
-
-def softmax(Y_P):
-	return np.exp(Y_P) / np.sum(np.exp(Y_P), keepdims=True)
+class learning_rate:
+	def __init__(self, learning_rate_start = 0.1, decay = 0.5):
+		self.learning_rate_start = learning_rate_start
+		self.learning_rate = self.learning_rate_start
+		self.decay = decay
+	def step(self):
+		self.learning_rate = self.learning_rate_start * 1.0 / (1.0 + self.decay * self.learning_rate)
+	def __mul__(self, scalar):
+		return self.learning_rate * scalar
+	def __rmul__(self, scalar):
+		return self.__mul__(scalar)
 
 class mlp:
 	def __init__(self, learning_rate = 0.1):
 		
 		self.learning_rate = learning_rate
 
-		#init
+
 		np.random.seed(2020)
 
 		self.w1 = 2.0*np.random.random((784, 300))-1.0
 		self.b1 = 2.0*np.random.random((300,))-1.0
 		self.w2 = 2.0*np.random.random((300, 10))-1.0
 		self.b2 = 2.0*np.random.random((10,))-1.0
-		
-
-		# self.w1 /= np.sqrt(784)
-		# self.w2 /= np.sqrt(100)
-		# self.b1 /= np.sqrt(100)
-		# self.b2 /= np.sqrt(10)
 
 	def forward(self, X, actF = sigmoid):
 		z1 = np.dot(X, self.w1) + self.b1
@@ -74,8 +57,6 @@ class mlp:
 			z2 = np.dot(a1, self.w2) + self.b2
 			a2 = sigmoid(z2)
 			Y_P = a2
-
-			Y_P = softmax(Y_P)
 
 			#cal loss
 			Y_vec = one_hot(10, Y)

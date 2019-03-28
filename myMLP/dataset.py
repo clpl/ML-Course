@@ -1,7 +1,7 @@
 from mnist import MNIST
 
 
-class mnist_data:
+class mnist_dataset:
 	def __init__(self, filePath = '../python-mnist/data'):
 		#load dataset
 		self.mndata = MNIST(filePath)

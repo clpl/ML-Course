@@ -9,27 +9,45 @@ from dataset import mnist_dataset
 mndata = mnist_dataset('../python-mnist/data')
 
 class mlp:
-	def __init__(self, learning_rate = 0.1):
+	def __init__(self, layer_size = [784,100,10], learning_rate = 0.1):
 		
 		self.learning_rate = learning_rate
-
-
+		self.layer_size = layer_size
 		np.random.seed(2020)
 
-		self.w1 = 2.0*np.random.random((784, 300))-1.0
-		self.b1 = 2.0*np.random.random((300,))-1.0
-		self.w2 = 2.0*np.random.random((300, 10))-1.0
-		self.b2 = 2.0*np.random.random((10,))-1.0
+		self.w, self.b = self._layer_init()
 
-	def forward(self, X, actF = sigmoid):
-		z1 = np.dot(X, self.w1) + self.b1
-		
-		a1 = sigmoid(z1)
 
-		z2 = np.dot(a1, self.w2) + self.b2
-		a2 = sigmoid(z2)
 
-		return a2
+	def _layer_init(self):
+		w_list = []
+		b_list = []
+		bound = 1.0
+
+		for i in range(len(layer_size) - 1):
+			layer_shape = tuple(layer_size[i:i+1])
+			layer_w = self._random_init(layer_shape, bound)
+			w_list.append(layer_w)
+			layer_b = self._random_init(layer_size[1], bound)
+			b_list.append(layer_b)
+
+		return w_list, b_list
+
+	def _random_init(self, shape, bound):
+		return numpy.random.uniform(-bound,bound,size=shape)
+
+	def forward(self, input_data, actF = sigmoid):
+		z_list = []
+		a_list = [input_data]
+		for i in len(self.w):
+			z = np.dot(self.w[i], a_list[i]) + self.b[i]
+			a = actF(z)
+
+			z_list.append(z)
+			a_list.append(a)
+
+		# z, a, output_layer
+		return z_list, a_list, a_list[-1]
 
 	def fit(self, x_batch, y_batch):
 		loss = 0.0

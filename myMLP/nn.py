@@ -5,11 +5,10 @@ from activationFunction import *
 from lossFunction import *
 from dataset import mnist_dataset
 
-#load dataset
-mndata = mnist_dataset('../python-mnist/data')
+
 
 class mlp:
-	def __init__(self, layer_size = [784,100,10], learning_rate = 0.1):
+	def __init__(self, layer_size = [784,300,10], learning_rate = 0.1):
 		
 		self.learning_rate = learning_rate
 		self.layer_size = layer_size
@@ -24,23 +23,25 @@ class mlp:
 		b_list = []
 		bound = 1.0
 
-		for i in range(len(layer_size) - 1):
-			layer_shape = tuple(layer_size[i:i+1])
+		for i in range(len(self.layer_size) - 1):
+			layer_shape = tuple(self.layer_size[i:i+2])
 			layer_w = self._random_init(layer_shape, bound)
 			w_list.append(layer_w)
-			layer_b = self._random_init(layer_size[1], bound)
+			layer_b = self._random_init(self.layer_size[i+1], bound)
 			b_list.append(layer_b)
 
 		return w_list, b_list
 
 	def _random_init(self, shape, bound):
-		return numpy.random.uniform(-bound,bound,size=shape)
+		return np.random.uniform(-bound,bound,size=shape)
 
 	def forward(self, input_data, actF = sigmoid):
 		z_list = []
 		a_list = [input_data]
-		for i in len(self.w):
-			z = np.dot(self.w[i], a_list[i]) + self.b[i]
+		for i in range(len(self.layer_size) - 1):
+			#print(a_list[i].shape, self.w[i].shape)
+			pre_a = a_list[i]
+			z = np.dot(pre_a, self.w[i]) + np.tile(self.b[i],(pre_a.shape[0], 1))
 			a = actF(z)
 
 			z_list.append(z)
@@ -49,48 +50,87 @@ class mlp:
 		# z, a, output_layer
 		return z_list, a_list, a_list[-1]
 
+	def backward(self, Y, z_list, a_list, d_act = d_sigmoid):
+		batch_size = Y.shape[0]
+		#L2 loss
+		delta_C = (a_list[-1] - Y)
+		delta_L = delta_C * d_act(z_list[-1])
+
+		delta_list = [delta_L]
+		delta_b_list = []
+		delta_w_list = []
+		for i in range(len(self.layer_size) - 2, -1, -1):
+			delta_l_plus_one = delta_list[-1]
+			delta_b_list.append(delta_l_plus_one)
+			#print(i,'a_l-1:', a_list[i].T.shape, 'loss_l', delta_l_plus_one.shape)
+			delta_w = np.dot(a_list[i].T, delta_l_plus_one)
+			delta_w_list.append(delta_w)
+			
+			if i == 0:
+				break
+			#print(i,'w:',self.w[i].shape, 'l+1:', delta_l_plus_one.shape, 'z:', z_list[i-1].shape)
+			delta_l = np.multiply(np.dot(self.w[i], delta_l_plus_one.T), d_act(z_list[i-1].T))
+			delta_list.append(delta_l.T)
+			
+		delta_b_list = list(reversed(delta_b_list))
+		delta_w_list = list(reversed(delta_w_list))
+		for i in range(0, len(self.layer_size) - 1):
+			self.w[i] -= self.learning_rate * delta_w_list[i]/batch_size
+			self.b[i] -= self.learning_rate * delta_b_list[i].mean(axis = 0)
+
+	def predict(self, x):
+		x = np.array(x)
+		_, _, y_p = self.forward(x)
+		
+		y_p = np.argmax(y_p, axis = 1)
+		return y_p
+		
+
 	def fit(self, x_batch, y_batch):
 		loss = 0.0
-		for i, item in enumerate(x_batch):
-			X = np.array(x_batch[i])/256.0
-			Y = y_batch[i]
-			#Y_P = self.forward(X)
+		
+		X = np.array(x_batch)/256.0
+		Y = np.array(y_batch)
+		Y = make_one_hot(Y)
+		# print(X.shape)
+		# print(Y.shape)
+		z_list, a_list, output_layer = self.forward(X)
+		loss, C = MSE_loss(output_layer, Y)
 
-			#forward
-			z1 = np.dot(X, self.w1) + self.b1
-			a1 = sigmoid(z1)
-			z2 = np.dot(a1, self.w2) + self.b2
-			a2 = sigmoid(z2)
-			Y_P = a2
+		self.backward(Y, z_list, a_list)
 
-			#cal loss
-			Y_vec = one_hot(10, Y)
-			loss_t = MSE_loss(Y_P, Y_vec)
-			loss += loss_t
+		return loss
+
 			
-			delta_C = a2 - Y_vec
-			delta_L = delta_C * sigmoid(z2, 'B')
-						
-			tmp = np.dot(delta_L, self.w2.T)
 
-			delta_l1 = sigmoid(z1, 'B') * tmp
-			
-			self.b2 = self.b2 - self.learning_rate*delta_L
-			self.b1 = self.b1 - self.learning_rate*delta_l1
-
-			self.w2 = self.w2 - self.learning_rate*np.dot(a1.reshape(a1.shape[0],1), delta_L.reshape(1,delta_L.shape[0]))
-			self.w1 = self.w1 - self.learning_rate*np.dot(X.reshape(X.shape[0],1), delta_l1.reshape(1,delta_l1.shape[0]))
-		print(loss)
+def eval_model(model, x, y):
+	y_p = model.predict(x)
+	y = np.array(y)
+	acc = np.array([y == y_p]).sum()
+	print("\nscore:", acc/y.shape[0] * 100, '%\n')
 	
+
+#load dataset
+mndata = mnist_dataset('../python-mnist/data')		
+
 mlp = mlp()
+
+
 def main():
 	max_epoch = 5000
-	batch_size = 50
+	batch_size = 100
+	score_per_epoch = 50
+	loss_per_epoch = 25
 
 	for epoch in range(max_epoch):
-		X, Y = next(gen_batch(batch_size))
-		mlp.fit(X,Y)
-		#break
+		X, Y = next(mndata.get_batch(batch_size))
+		loss = mlp.fit(X,Y)
+		if epoch % loss_per_epoch == 0:
+			print('epoch:', epoch, 'loss:', loss)
+		if epoch % score_per_epoch == 0:
+			test_image, test_label = mndata.get_test()
+			eval_model(mlp, test_image, test_label)
+
 
 
 

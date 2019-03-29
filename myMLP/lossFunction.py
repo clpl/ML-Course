@@ -1,7 +1,19 @@
+import numpy as np
 
-# L1 loss
+
+# L2 loss
 def MSE_loss(Y_P, Y):
 
-	loss_sum = np.square(Y_P - Y).sum()
+	delta_C = np.square(Y_P - Y)
+	loss_sum = delta_C.sum()
 	
-	return loss_sum / (2 * len(Y))
+	return loss_sum, delta_C
+
+
+def CrossEntropyLoss(yi_hat, yi):
+    '''
+    compute Cross Entropy Loss for output yi
+    type yi: predicted output
+    type label_batch: ground truth
+    '''
+    return -np.sum(yi * np.log(yi_hat), axis = 1)

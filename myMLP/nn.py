@@ -139,17 +139,17 @@ def read_arg():
 	args = parser.parse_args()
 	return args
 
+
+args = read_arg()
+
+max_epoch = args.max_epoch
+batch_size = args.batch_size
+score_per_epoch = args.score_per_epoch
+loss_per_epoch = args.loss_per_epoch
+layer_size = args.layer_szie.split(',')
+mlp = mlp(layer_size = layer_size)
+
 def main():
-
-	args = read_arg()
-
-	max_epoch = args.max_epoch
-	batch_size = args.batch_size
-	score_per_epoch = args.score_per_epoch
-	loss_per_epoch = args.loss_per_epoch
-	layer_size = args.layer_szie.split(',')
-
-	mlp = mlp(layer_size = layer_size)
 
 	for epoch in range(max_epoch):
 		X, Y = next(mndata.get_batch(batch_size))

@@ -136,7 +136,7 @@ def read_arg():
 	parser.add_argument("--score_per_epoch", type=int, default = 50)
 	parser.add_argument("--loss_per_epoch", type=int, default = 25)
 	parser.add_argument("--layer_szie", type=str, default = '784,300,10')
-	parser.add_argument("--out_put_prefix", type=str, default = '784,300,10')
+	parser.add_argument("--out_put_prefix", type=str, default = 'file')
 
 	args = parser.parse_args()
 	return args

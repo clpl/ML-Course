@@ -147,6 +147,7 @@ batch_size = args.batch_size
 score_per_epoch = args.score_per_epoch
 loss_per_epoch = args.loss_per_epoch
 layer_size = args.layer_szie.split(',')
+layer_size = list(map(eval, layer_size))
 mlp = mlp(layer_size = layer_size)
 
 def main():

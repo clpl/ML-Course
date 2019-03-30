@@ -8,7 +8,7 @@ from dataset import mnist_dataset
 
 
 class mlp:
-	def __init__(self, layer_size = [784,300,10], learning_rate = 0.1):
+	def __init__(self, layer_size = [784,100,10], learning_rate = 0.1):
 		
 		self.learning_rate = learning_rate
 		self.layer_size = layer_size
@@ -62,21 +62,31 @@ class mlp:
 		for i in range(len(self.layer_size) - 2, -1, -1):
 			delta_l_plus_one = delta_list[-1]
 			delta_b_list.append(delta_l_plus_one)
-			#print(i,'a_l-1:', a_list[i].T.shape, 'loss_l', delta_l_plus_one.shape)
-			delta_w = np.dot(a_list[i].T, delta_l_plus_one)
+			#print(i,'a_l-1:', a_list[i].shape, 'loss_l', delta_l_plus_one.shape)
+			# delta_w = np.dot(a_list[i], delta_l_plus_one)
+
+			delta_w = np.empty((batch_size, a_list[i].shape[1], delta_l_plus_one.shape[1]))
+
+			for index in range(batch_size):
+				delta_w[index,:,:] = np.outer(a_list[i][index,:], delta_l_plus_one[index,:])
+				
+			
 			delta_w_list.append(delta_w)
 			
 			if i == 0:
 				break
-			#print(i,'w:',self.w[i].shape, 'l+1:', delta_l_plus_one.shape, 'z:', z_list[i-1].shape)
+
+			#print(i,'w:',self.w[i].shape, 'l+1:', delta_l_plus_one.shape, 'z:', z_list[i-1].T.shape)
 			delta_l = np.multiply(np.dot(self.w[i], delta_l_plus_one.T), d_act(z_list[i-1].T))
 			delta_list.append(delta_l.T)
+			
 			
 		delta_b_list = list(reversed(delta_b_list))
 		delta_w_list = list(reversed(delta_w_list))
 		for i in range(0, len(self.layer_size) - 1):
-			self.w[i] -= self.learning_rate * delta_w_list[i]/batch_size
+			self.w[i] -= self.learning_rate * delta_w_list[i].mean(axis = 0)
 			self.b[i] -= self.learning_rate * delta_b_list[i].mean(axis = 0)
+
 
 	def predict(self, x):
 		x = np.array(x)

@@ -119,7 +119,8 @@ def eval_model(model, x, y):
 	y_p = model.predict(x)
 	y = np.array(y)
 	acc = np.array([y == y_p]).sum()
-	print("\nscore:", acc/y.shape[0] * 100, '%\n')
+	
+	return acc/y.shape[0] * 100
 	
 
 #load dataset
@@ -135,6 +136,7 @@ def read_arg():
 	parser.add_argument("--score_per_epoch", type=int, default = 50)
 	parser.add_argument("--loss_per_epoch", type=int, default = 25)
 	parser.add_argument("--layer_szie", type=str, default = '784,300,10')
+	parser.add_argument("--out_put_prefix", type=str, default = '784,300,10')
 
 	args = parser.parse_args()
 	return args
@@ -148,19 +150,28 @@ score_per_epoch = args.score_per_epoch
 loss_per_epoch = args.loss_per_epoch
 layer_size = args.layer_szie.split(',')
 layer_size = list(map(eval, layer_size))
+file_prefix = args.out_put_prefix
 mlp = mlp(layer_size = layer_size)
 
 def main():
+
+	file_loss = open(file_prefix + "_loss", 'w')
+	file_score = open(file_prefix + "_score", "w")
 
 	for epoch in range(max_epoch):
 		X, Y = next(mndata.get_batch(batch_size))
 		loss = mlp.fit(X,Y)
 		if epoch % loss_per_epoch == 0:
 			print('epoch:', epoch, 'loss:', loss)
+			print(epoch, loss, file = file_loss)
 		if epoch % score_per_epoch == 0:
 			test_image, test_label = mndata.get_test()
-			eval_model(mlp, test_image, test_label)
+			score = eval_model(mlp, test_image, test_label)
+			print("\nscore:", score, '%\n')
+			print(epoch, score, file = file_score)
 
+	file_loss.close()
+	file_score.close()
 
 
 

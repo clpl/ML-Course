@@ -1,9 +1,11 @@
 #coding:utf-8
 
 import numpy as np
+import argparse
 from activationFunction import *
 from lossFunction import *
 from dataset import mnist_dataset
+
 
 
 
@@ -123,14 +125,31 @@ def eval_model(model, x, y):
 #load dataset
 mndata = mnist_dataset('../python-mnist/data')		
 
-mlp = mlp()
 
+
+
+def read_arg():
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--max_epoch", type=int, default = 10000)
+	parser.add_argument("--batch_size", type=int, default = 550)
+	parser.add_argument("--score_per_epoch", type=int, default = 50)
+	parser.add_argument("--loss_per_epoch", type=int, default = 25)
+	parser.add_argument("--layer_szie", type=str, default = '784,300,10')
+
+	args = parser.parse_args()
+	return args
 
 def main():
-	max_epoch = 5000
-	batch_size = 100
-	score_per_epoch = 50
-	loss_per_epoch = 25
+
+	args = read_arg()
+
+	max_epoch = args.max_epoch
+	batch_size = args.batch_size
+	score_per_epoch = args.score_per_epoch
+	loss_per_epoch = args.loss_per_epoch
+	layer_size = args.layer_szie.split(',')
+
+	mlp = mlp(layer_size = layer_size)
 
 	for epoch in range(max_epoch):
 		X, Y = next(mndata.get_batch(batch_size))

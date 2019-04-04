@@ -41,16 +41,18 @@ class mlp:
 		z_list = []
 		a_list = [input_data]
 		for i in range(len(self.layer_size) - 1):
-			#print(a_list[i].shape, self.w[i].shape)
 			pre_a = a_list[i]
 			z = np.dot(pre_a, self.w[i]) + np.tile(self.b[i],(pre_a.shape[0], 1))
 			a = actF(z)
 
+			#store 'z' and 'a'
 			z_list.append(z)
 			a_list.append(a)
 
+		output_layer = softmax(a_list[-1])
+
 		# z, a, output_layer
-		return z_list, a_list, a_list[-1]
+		return z_list, a_list, output_layer
 
 	def backward(self, Y, z_list, a_list, d_act = d_sigmoid):
 		batch_size = Y.shape[0]
@@ -64,21 +66,16 @@ class mlp:
 		for i in range(len(self.layer_size) - 2, -1, -1):
 			delta_l_plus_one = delta_list[-1]
 			delta_b_list.append(delta_l_plus_one)
-			#print(i,'a_l-1:', a_list[i].shape, 'loss_l', delta_l_plus_one.shape)
-			# delta_w = np.dot(a_list[i], delta_l_plus_one)
 
 			delta_w = np.empty((batch_size, a_list[i].shape[1], delta_l_plus_one.shape[1]))
 
 			for index in range(batch_size):
 				delta_w[index,:,:] = np.outer(a_list[i][index,:], delta_l_plus_one[index,:])
 				
-			
 			delta_w_list.append(delta_w)
 			
 			if i == 0:
 				break
-
-			#print(i,'w:',self.w[i].shape, 'l+1:', delta_l_plus_one.shape, 'z:', z_list[i-1].T.shape)
 			delta_l = np.multiply(np.dot(self.w[i], delta_l_plus_one.T), d_act(z_list[i-1].T))
 			delta_list.append(delta_l.T)
 			
@@ -104,10 +101,11 @@ class mlp:
 		X = np.array(x_batch)/256.0
 		Y = np.array(y_batch)
 		Y = make_one_hot(Y)
-		# print(X.shape)
-		# print(Y.shape)
+	
 		z_list, a_list, output_layer = self.forward(X)
-		loss, C = MSE_loss(output_layer, Y)
+		# # MSE loss
+		# loss, C = MSE_loss(output_layer, Y)
+		loss = CrossEntropyLoss(Y, output_layer)
 
 		self.backward(Y, z_list, a_list)
 

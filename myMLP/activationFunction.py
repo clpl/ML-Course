@@ -13,5 +13,17 @@ def tanh(x, mode = 'F'):
 def d_tanh(x):
 	return (1.0 - x * x)
 
+def relu(x):
+	return x if x > 0 else 0
+
+def d_relu(x):
+	return 1.0 if x > 0 else 0
+
+def softmax(x):
+	return np.exp(x) / np.sum(np.exp(x))
+
+def d_softmax(x):
+	return softmax(x) * (1 - softmax(x))
+
 def make_one_hot(data1):
     return (np.arange(10)==data1[:,None]).astype(np.float)

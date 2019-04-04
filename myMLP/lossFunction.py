@@ -10,7 +10,7 @@ def MSE_loss(Y_P, Y):
 	return loss_sum, delta_C
 
 
-def CrossEntropyLoss(yi_hat, yi):
+def CrossEntropyLoss(yi, yi_hat):
     '''
     compute Cross Entropy Loss for output yi
     type yi: predicted output

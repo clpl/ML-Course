@@ -4,4 +4,4 @@ python nn.py \
 --loss_per_epoch 10 \
 --score_per_epoch 20 \
 --max_epoch 10000 \
---batch_size 550
+--batch_size 1

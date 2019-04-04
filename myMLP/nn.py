@@ -37,7 +37,7 @@ class mlp:
 	def _random_init(self, shape, bound):
 		return np.random.uniform(-bound,bound,size=shape)
 
-	def forward(self, input_data, actF = sigmoid):
+	def forward(self, input_data, actF = relu):
 		z_list = []
 		a_list = [input_data]
 		for i in range(len(self.layer_size) - 1):
@@ -54,7 +54,7 @@ class mlp:
 		# z, a, output_layer
 		return z_list, a_list, output_layer
 
-	def backward(self, Y, z_list, a_list, d_act = d_sigmoid):
+	def backward(self, Y, z_list, a_list, d_act = d_relu):
 		batch_size = Y.shape[0]
 		#L2 loss
 		delta_C = (a_list[-1] - Y)

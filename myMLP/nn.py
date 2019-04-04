@@ -109,7 +109,7 @@ class mlp:
 
 		self.backward(Y, z_list, a_list)
 
-		return loss
+		return loss.sum()
 
 			
 

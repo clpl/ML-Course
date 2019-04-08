@@ -79,7 +79,13 @@ class mlp:
 			
 			if i == 0:
 				break
-			delta_l = np.multiply(np.dot(self.w[i], delta_l_plus_one.T), d_act(z_list[i-1].T))
+			
+			# # MSE loss
+			# delta_l = np.multiply(np.dot(self.w[i], delta_l_plus_one.T), d_act(z_list[i-1].T))
+			
+			# cross entropy
+			delta_l = np.dot(self.w[i], delta_l_plus_one.T)
+			
 			delta_list.append(delta_l.T)
 			
 			

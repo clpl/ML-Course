@@ -55,7 +55,7 @@ class mlp:
 		# z, a, output_layer
 		return z_list, a_list, output_layer
 
-	def backward(self, Y, z_list, a_list, d_actF = d_relu):
+	def backward(self, Y, z_list, a_list, d_act = d_relu):
 		batch_size = Y.shape[0]
 		#L2 loss
 		delta_C = (a_list[-1] - Y)
@@ -108,7 +108,7 @@ class mlp:
 		loss, C = MSE_loss(output_layer, Y)
 		#loss = CrossEntropyLoss(Y, output_layer)
 
-		self.backward(Y, z_list, a_list, d_actF = d_sigmoid)
+		self.backward(Y, z_list, a_list, d_act = d_sigmoid)
 
 		return loss.sum()
 

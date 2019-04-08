@@ -49,7 +49,8 @@ class mlp:
 			z_list.append(z)
 			a_list.append(a)
 
-		output_layer = softmax(a_list[-1])
+		output_layer = a_list[-1]
+		# output_layer = softmax(a_list[-1])
 
 		# z, a, output_layer
 		return z_list, a_list, output_layer
@@ -102,12 +103,12 @@ class mlp:
 		Y = np.array(y_batch)
 		Y = make_one_hot(Y)
 	
-		z_list, a_list, output_layer = self.forward(X)
-		# # MSE loss
-		# loss, C = MSE_loss(output_layer, Y)
-		loss = CrossEntropyLoss(Y, output_layer)
+		z_list, a_list, output_layer = self.forward(X, actF = sigmoid)
+		# MSE loss
+		loss, C = MSE_loss(output_layer, Y)
+		#loss = CrossEntropyLoss(Y, output_layer)
 
-		self.backward(Y, z_list, a_list)
+		self.backward(Y, z_list, a_list, actF = d_sigmoid)
 
 		return loss.sum()
 

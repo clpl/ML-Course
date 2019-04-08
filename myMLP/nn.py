@@ -153,8 +153,8 @@ mlp = mlp(layer_size = layer_size)
 
 def main():
 
-	file_loss = open(file_prefix + "_loss", 'w')
-	file_score = open(file_prefix + "_score", "w")
+	file_loss = open(file_prefix + "_loss.log", 'w')
+	file_score = open(file_prefix + "_score.log", "w")
 
 	for epoch in range(max_epoch):
 		X, Y = next(mndata.get_batch(batch_size))

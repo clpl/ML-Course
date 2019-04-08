@@ -14,12 +14,10 @@ def d_tanh(x):
 	return (1.0 - x * x)
 
 def relu(x):
-	return np.maximum(x, 0)
+	return x * (x > 0)
 
 def d_relu(x):
-	x[x <= 0] = 0
-	x[x > 0] = 1
-	return x
+	return 1. * (x > 0)
 
 def softmax(x):
 	return np.exp(x) / np.sum(np.exp(x))

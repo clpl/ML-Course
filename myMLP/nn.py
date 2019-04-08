@@ -58,8 +58,10 @@ class mlp:
 	def backward(self, Y, z_list, a_list, d_act = d_sigmoid):
 		batch_size = Y.shape[0]
 		#L2 loss
-		delta_C = d_CrossEntropyLoss(a_list[-1], Y)
-		delta_L = delta_C * d_act(z_list[-1])
+		delta_C = d_sigmoid(a_list[-1], Y)
+		#delta_L = delta_C * d_act(z_list[-1])
+
+		delta_L = delta_C
 
 		delta_list = [delta_L]
 		delta_b_list = []

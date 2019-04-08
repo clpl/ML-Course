@@ -103,12 +103,12 @@ class mlp:
 		Y = np.array(y_batch)
 		Y = make_one_hot(Y)
 	
-		z_list, a_list, output_layer = self.forward(X, actF = relu)
+		z_list, a_list, output_layer = self.forward(X, actF = sigmoid)
 		# MSE loss
 		loss, C = MSE_loss(output_layer, Y)
 		#loss = CrossEntropyLoss(Y, output_layer)
 
-		self.backward(Y, z_list, a_list, d_act = d_relu)
+		self.backward(Y, z_list, a_list, d_act = d_sigmoid)
 
 		return loss.sum()
 

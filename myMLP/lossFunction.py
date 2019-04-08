@@ -9,6 +9,8 @@ def MSE_loss(Y_P, Y):
 	
 	return loss_sum, delta_C
 
+def d_MSE_loss(a, y):
+    return (a - y)
 
 def CrossEntropyLoss(yi, yi_hat):
     '''
@@ -17,3 +19,6 @@ def CrossEntropyLoss(yi, yi_hat):
     type label_batch: ground truth
     '''
     return -np.sum(yi * np.log(yi_hat), axis = 1)
+
+def d_CrossEntropyLoss(a, y):
+    return np.sum(np.nan_to_num(-y*np.log(a)-(1-y)*np.log(1-a)))

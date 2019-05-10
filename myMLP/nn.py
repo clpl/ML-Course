@@ -50,8 +50,7 @@ class mlp:
 			a_list.append(a)
 
 		output_layer = a_list[-1]
-		
-		output_layer = softmax(a_list[-1])
+		# output_layer = softmax(a_list[-1])
 
 		# z, a, output_layer
 		return z_list, a_list, output_layer
@@ -60,8 +59,7 @@ class mlp:
 		batch_size = Y.shape[0]
 		#L2 loss
 		delta_C = d_MSE_loss(a_list[-1], Y)
-		delta_C = delta_C * d_softmax(delta_C)
-		delta_L = delta_C * d_act(z_list[-1])
+		#delta_L = delta_C * d_act(z_list[-1])
 
 		delta_L = delta_C
 

@@ -50,7 +50,7 @@ class mlp:
 			a_list.append(a)
 
 		output_layer = a_list[-1]
-		# output_layer = softmax(a_list[-1])
+		output_layer = softmax(a_list[-1])
 
 		# z, a, output_layer
 		return z_list, a_list, output_layer

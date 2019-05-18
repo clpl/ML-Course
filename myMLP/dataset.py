@@ -1,5 +1,5 @@
 from mnist import MNIST
-
+import random
 
 class mnist_dataset:
 	def __init__(self, filePath = '../python-mnist/data'):
@@ -17,6 +17,7 @@ class mnist_dataset:
 			end_index = start_index + batch_size
 			if end_index > len(self.train_images):
 				start_index = 0
+				random.shuffle(self.train_images)
 			X = self.train_images[start_index:end_index]
 			Y = self.train_labels[start_index:end_index]
 			yield (X, Y)

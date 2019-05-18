@@ -5,14 +5,15 @@ import argparse
 from activationFunction import *
 from lossFunction import *
 from dataset import mnist_dataset
-
+from learningRate import learningRateC
 
 
 
 class mlp:
 	def __init__(self, layer_size = [784,100,10], learning_rate = 0.1):
 		
-		self.learning_rate = learning_rate
+		#self.learning_rate = learningRateC()
+		self.learning_rate = 0.1
 		self.layer_size = layer_size
 		np.random.seed(2020)
 
@@ -50,13 +51,14 @@ class mlp:
 			a_list.append(a)
 
 		output_layer = a_list[-1]
-		output_layer = softmax(a_list[-1])
+		#output_layer = softmax(a_list[-1])
 
 		# z, a, output_layer
 		return z_list, a_list, output_layer
 
-	def backward(self, Y, z_list, a_list, d_act = d_sigmoid):
+	def backward(self, Y, z_list, a_list, d_act = d_sigmoid, lam = 1):
 		batch_size = Y.shape[0]
+
 		#L2 loss
 		delta_C = d_MSE_loss(a_list[-1], Y)
 		#delta_L = delta_C * d_act(z_list[-1])
@@ -66,6 +68,8 @@ class mlp:
 		delta_list = [delta_L]
 		delta_b_list = []
 		delta_w_list = []
+
+		# cal loss each layer
 		for i in range(len(self.layer_size) - 2, -1, -1):
 			delta_l_plus_one = delta_list[-1]
 			delta_b_list.append(delta_l_plus_one)
@@ -92,8 +96,8 @@ class mlp:
 		delta_b_list = list(reversed(delta_b_list))
 		delta_w_list = list(reversed(delta_w_list))
 		for i in range(0, len(self.layer_size) - 1):
-			self.w[i] -= self.learning_rate * delta_w_list[i].mean(axis = 0)
-			self.b[i] -= self.learning_rate * delta_b_list[i].mean(axis = 0)
+			self.w[i] -= self.learning_rate * (delta_w_list[i].mean(axis = 0) + lam / batch_size * self.w[i])
+			self.b[i] -= self.learning_rate * (delta_b_list[i].mean(axis = 0))
 
 
 	def predict(self, x):
@@ -170,12 +174,12 @@ def main():
 		loss = mlp.fit(X,Y)
 		if epoch % loss_per_epoch == 0:
 			print('epoch:', epoch, 'loss:', loss)
-			print(epoch, loss, file = file_loss)
+			print(epoch, loss, file = file_loss, sep="\t")
 		if epoch % score_per_epoch == 0:
 			test_image, test_label = mndata.get_test()
 			score = eval_model(mlp, test_image, test_label)
 			print("\nscore:", score, '%\n')
-			print(epoch, score, file = file_score)
+			print(epoch, score, file = file_score, sep="\t")
 
 	file_loss.close()
 	file_score.close()
